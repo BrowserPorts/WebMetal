@@ -5,14 +5,14 @@
 //! of the outcomes Metal allows (plan section 6.2). What the executor must still reproduce is which allocations
 //! succeed: `newBufferWithLength:options:` returns "nil if the heap memory is full" (`MTLHeap` documentation).
 //!
-//! The A10X's sizes come from the device profile: `heapBufferSizeAndAlignWithLength:options:` returns the length as
-//! the size and 256 as the alignment (`[heap]` of `profile/ipados-17.7.11-21H461-a10x.toml`, both extraction methods
-//! agreeing, over 504 lengths and every storage, cache and hazard-tracking mode). Neither the heap's size rounding nor
-//! the driver's free-space policy is in the profile, so a buffer allocation is granted only when it is certain: its
-//! documented size, at its documented alignment, fits in the size the descriptor asked for after every buffer granted
-//! so far, none of whose space is reused (a heap's `size` is at least the requested size, as
-//! `heap.size-at-least-requested` records on real Metal). Anything else is refused loudly with the reason; it is never
-//! answered with a guessed `nil` or a guessed success.
+//! The A10X's sizes come from the device profile: `heapBufferSizeAndAlignWithLength:options:` returns the length as the
+//! size and 256 as the alignment (`[heap]` of the device profile, both extraction methods agreeing, over 504 lengths
+//! and every storage, cache and hazard-tracking mode). Neither the heap's size rounding nor the driver's free-space
+//! policy is in the profile, so a buffer allocation is granted only when it is certain: its documented size, at its
+//! documented alignment, fits in the size the descriptor asked for after every buffer granted so far, none of whose
+//! space is reused (a heap's `size` is at least the requested size, as `heap.size-at-least-requested` records on real
+//! Metal). Anything else is refused loudly with the reason; it is never answered with a guessed `nil` or a guessed
+//! success.
 //!
 //! Textures are placed by the guest, which lays them out as the AGX driver does and takes their range from its heap
 //! with IOGPU's own allocator (`guest/Resources/WebMetalTexture.mm`, `NewHeapTexture`); a `HeapCreateTexture` names a
@@ -159,7 +159,6 @@ impl Heap {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mem::testutil::repo_path;
 
     fn descriptor(kind: i64, size: u64, storage: u64) -> HeapDescriptor {
         HeapDescriptor {
@@ -179,7 +178,7 @@ mod tests {
 
     #[test]
     fn profile_values() {
-        let profile = std::fs::read_to_string(repo_path("profile/ipados-17.7.11-21H461-a10x.toml")).unwrap();
+        let profile = crate::format::profile::text();
         let heap = profile.split("\n[heap]\n").nth(1).unwrap();
         let value = |key: &str| {
             heap.lines().find_map(|l| l.strip_prefix(&format!("{key} = "))).unwrap().split_whitespace().next().unwrap()

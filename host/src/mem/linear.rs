@@ -314,12 +314,11 @@ impl<A: Api> Memory<A> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mem::testutil::repo_path;
 
     /// The alignment and the format list against the device profile.
     #[test]
     fn profile_values() {
-        let profile = std::fs::read_to_string(repo_path("profile/ipados-17.7.11-21H461-a10x.toml")).unwrap();
+        let profile = crate::format::profile::text();
         for query in ["minimumLinearTextureAlignmentForPixelFormat:", "minimumTextureBufferAlignmentForPixelFormat:"] {
             let header = format!("[queries.\"{query}\"]\n");
             let section = profile.split(&header).nth(1).unwrap().split("\n[").next().unwrap();

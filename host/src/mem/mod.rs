@@ -40,8 +40,5 @@ pub mod surface;
 pub mod texture;
 pub mod view;
 
-#[cfg(test)]
-mod testutil;
-
 pub use error::MemError;
 pub use memory::Memory;

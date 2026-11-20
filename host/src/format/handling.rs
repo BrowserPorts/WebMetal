@@ -11,7 +11,8 @@
 
 use super::decode::{self, Scheme};
 use super::packed;
-use super::table::{A10X_FORMATS, A10X_GETTERS, A10xFormatRecord, FormatClass, METAL_FORMATS, MetalFormatRow};
+use super::profile::{A10X_FORMATS, A10X_GETTERS, A10xFormatRecord};
+use super::table::{FormatClass, METAL_FORMATS, MetalFormatRow};
 use super::webgpu::{Cond, Feature, HostFeatures, SampleType, WebGpuFormat};
 
 /// Why the executor cannot provide a format or a capability exactly. Reported loudly, never substituted.
@@ -154,7 +155,7 @@ const PRIVATE_FORMAT: Refusal = Refusal {
     id: "private-pixel-format",
     reason: "The format is not in the SDK's MTLPixelFormat enum; the A10X profile records only its flag word, and no \
              source available here defines its texel layout or conversions.",
-    source: "profile/ipados-17.7.11-21H461-a10x.toml, pixel_format_list.private",
+    source: "device profile, pixel_format_list.private",
 };
 
 const ASTC_HDR: Refusal = Refusal {
@@ -162,8 +163,7 @@ const ASTC_HDR: Refusal = Refusal {
     reason: "The A10X answers supportsASTCHDRTextureCompression NO while MTLPixelFormatGetInfoForDevice marks the HDR \
              formats supported. Whether its texture unit returns the LDR profile's error color for HDR endpoint modes \
              or an HDR decode is hardware behavior with no reference here.",
-    source: "profile/ipados-17.7.11-21H461-a10x.toml, getters.supportsASTCHDRTextureCompression and \
-             pixel_formats.222-236",
+    source: "device profile, getters.supportsASTCHDRTextureCompression and pixel_formats.222-236",
 };
 
 const ASTC_PRIVATE_FOOTPRINT: Refusal = Refusal {
@@ -483,7 +483,7 @@ pub fn check_usage(r: Resolution, usage: Usage, features: HostFeatures) -> Resul
             return Err(Refusal {
                 id: "sample-count",
                 reason: "The A10X supports sample counts 1, 2 and 4 only.",
-                source: "profile/ipados-17.7.11-21H461-a10x.toml, queries.supportsTextureSampleCount:",
+                source: "device profile, queries.supportsTextureSampleCount:",
             });
         }
     }

@@ -1,7 +1,7 @@
 //! Pixel formats.
 //!
-//! - [`table`]: the Metal and WebGPU format lists, generated from `tables/formats.toml`, `tables/limits.toml` and the
-//!   A10X device profile.
+//! - [`table`]: the Metal and WebGPU format lists, generated from `tables/formats.toml` and `tables/limits.toml`.
+//! - [`profile`]: the A10X's format records and capability getters, from the device profile the build is given.
 //! - [`webgpu`]: WebGPU format capabilities evaluated against a host device's features.
 //! - [`handling`]: how each Metal format the A10X reports is provided (natively, emulated or refused), resolved
 //!   against a host's features, and the capability checks of the creating and using calls.
@@ -17,6 +17,7 @@ pub mod decode;
 pub mod etc2;
 pub mod handling;
 pub mod packed;
+pub mod profile;
 pub mod pvrtc;
 pub mod reinterpret;
 pub mod storage;

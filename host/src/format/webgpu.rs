@@ -228,7 +228,8 @@ mod tests {
     /// from tables/formats.toml or the device profile.
     #[test]
     fn generated_table_matches_its_sources() {
-        use super::super::table::{A10X_FORMATS, METAL_FORMATS};
+        use super::super::profile::A10X_FORMATS;
+        use super::super::table::METAL_FORMATS;
         use super::super::testdata::repo_path;
         fn quoted(line: &str, key: &str) -> Option<String> {
             line.strip_prefix(&format!("{key} = \"")).map(|r| r.trim_end_matches('"').to_string())
@@ -269,7 +270,7 @@ mod tests {
         }
         assert_eq!(webgpu, WebGpuFormat::ALL.iter().map(|f| f.name().to_string()).collect::<Vec<_>>());
 
-        let profile = std::fs::read_to_string(repo_path("profile/ipados-17.7.11-21H461-a10x.toml")).unwrap();
+        let profile = super::super::profile::text();
         let mut records = Vec::new();
         let mut current = None;
         for line in profile.lines() {

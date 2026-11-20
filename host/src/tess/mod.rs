@@ -67,7 +67,7 @@ fn size64(v: u64, op: &str) -> Result<Size64> {
     Size64::new(v).map_err(|_| RenderError::unimplemented(format!("{op}: {v} bytes beyond WebGPU's sizes")))
 }
 
-/// The A10X's `maxTessellationFactor` (device profile `ipados-17.7.11-21H461-a10x.toml`).
+/// The A10X's `maxTessellationFactor` (device profile, `[getters]`).
 pub const A10X_MAX_FACTOR: u64 = 16;
 
 /// The render path's pass plan for the compiler's `PassPlan::Tessellation`, from the pipeline's tessellation state:

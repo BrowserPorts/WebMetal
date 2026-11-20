@@ -30,6 +30,8 @@ wasm-bindgen-futures = { version = "=0.4.55", optional = true }
 
 [build-dependencies]
 bindgen = { version = "0.72", optional = true, default-features = false, features = ["runtime"] }
+# Reads the device profile (build.rs).
+toml = { version = "0.8", default-features = false, features = ["parse"] }
 
 [[example]]
 name = "gpu_web_smoke"
