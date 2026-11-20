@@ -5,12 +5,12 @@
 // then registers the device with MTLAddDevice. For the WebMetal accelerator those are AGXMetalA10.bundle and
 // AGXA10XDevice (wire/README.md, "Transport"), as for the A10X's accelerator on 21H461.
 //
-// The bundle's Info.plist is 21H461's AGXMetalA10.bundle's (guest/Generated/Info.plist, from the user's own root) but
+// The bundle's Info.plist is 21H461's AGXMetalA10.bundle's (the build takes it from the user's own root) but
 // for CFBundleExecutable, which names this executable, WebMetal. The 21H461 dyld shared cache holds
 // /System/Library/Extensions/AGXMetalA10.bundle/AGXMetalA10, and dyld loads a path the cache holds from the cache
 // whatever is on disk (dyld-1165.3 Loader.cpp), so an executable under the driver's name would load the A10X driver
 // itself. The bundle is signed with the resource rules of 21H461's _CodeSignature/CodeResources
-// (guest/Generated/ResourceRules.plist), which seal nothing outside Resources/: its CodeResources is the driver
+// (the build takes them from the user's own root), which seal nothing outside Resources/: its CodeResources is the driver
 // bundle's, and the driver's resource files beside it on the system volume stay unsealed, as they are there.
 //
 // The device classes keep 21H461's chain inside the bundle, AGXA10XDevice -> AGXA10FamilyDevice, each with the methods

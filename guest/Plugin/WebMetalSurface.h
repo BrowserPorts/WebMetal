@@ -6,13 +6,16 @@
 //
 // - WebMetalTargetSurface.h: in namespace webmetal::target, kCacheUUID (the dyld shared cache's UUID), kRoles (a Role
 //   for each class of guest/Plugin/roles.toml, with the DriverSelector rows its driver class carries) and kBases (the
-//   BaseLayout of each Metal.framework base class the roles reach), in the shapes below;
+//   BaseLayout of each Metal.framework base class the roles reach), in the shapes below, which UniXNU's
+//   scripts/audit-target-web-metal-surface.py writes;
 // - WebMetalProfileGetters.mm: the capability getters whose answers the device profile records, as categories on the
 //   plugin's device classes that return the recorded values, which guest/gen/profilegetters.py generates from the
-//   profile the build is given (WEBMETAL_PROFILE) and this header;
-// - WebMetalTextureFormats.inc: the A10X driver's texture format table (host/src/mem/agx/mod.rs);
-// - Info.plist and ResourceRules.plist: the driver bundle's Info.plist and the resource rules of its
-//   _CodeSignature/CodeResources, which the bundle is built with (guest/Plugin/WebMetalDevice.h).
+//   profile the build is given (WEBMETAL_PROFILE) and the target surface;
+// - WebMetalTextureFormats.inc: the A10X driver's texture format table (host/src/mem/agx/mod.rs), which
+//   profile/webmetal_profile/texture_formats.py writes.
+//
+// The bundle's Info.plist and resource rules are the driver bundle's, which the plugin's build reads from the user's
+// root (guest/Plugin/WebMetalDevice.h).
 
 #pragma once
 

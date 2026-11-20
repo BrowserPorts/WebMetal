@@ -11,8 +11,11 @@ Methods whose behavior is more than writing one record (encoder life cycle, labe
 guest/Commands/WebMetalEncoders.mm and are excluded here. An argument the script cannot convert (a descriptor structure,
 a property-list value) makes it fail rather than guess.
 
+The method signatures come from the target surface, which is made from the user's own root, so the output is not
+committed: the plugin's build runs this script, and Git ignores the file it writes.
+
     python3 -B -I guest/Commands/gen/encodergen.py           write guest/Commands/WebMetalEncoderRecords.mm
-    python3 -B -I guest/Commands/gen/encodergen.py --check   fail if the committed file differs
+    python3 -B -I guest/Commands/gen/encodergen.py --check   fail if that file differs from a fresh generation
 """
 import argparse
 import re
