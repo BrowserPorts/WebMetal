@@ -16,7 +16,7 @@ webmetal-host = { path = ".." }
 webmetal-wire = { path = "../../wire" }
 # The compiler the executor links (host/Cargo.toml pins the same commit); the pipeline tests read the reference
 # library with it.
-airwgsl = { git = "https://github.com/MovByte/AirWgsl", rev = "8dc0da5acb091beda089f2b0f46ed4d436d077c9" }
+airwgsl = { git = "https://github.com/BrowserPorts/AirWgsl", rev = "8dc0da5acb091beda089f2b0f46ed4d436d077c9" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # The versions host/Cargo.toml pins; the wasm-bindgen CLI that post-processes the modules must match.

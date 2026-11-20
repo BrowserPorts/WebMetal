@@ -18,9 +18,9 @@ webmetal-wire = { path = "../wire" }
 # dependencies and builds for the native and the wasm32 targets alike. To build against a local AirWgsl checkout,
 # patch the source in an untracked `.cargo/config.toml`:
 #
-#     [patch."https://github.com/MovByte/AirWgsl"]
+#     [patch."https://github.com/BrowserPorts/AirWgsl"]
 #     airwgsl = { path = "/path/to/AirWgsl" }
-airwgsl = { git = "https://github.com/MovByte/AirWgsl", rev = "8dc0da5acb091beda089f2b0f46ed4d436d077c9" }
+airwgsl = { git = "https://github.com/BrowserPorts/AirWgsl", rev = "8dc0da5acb091beda089f2b0f46ed4d436d077c9" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # The wasm-bindgen crate and the wasm-bindgen CLI that post-processes the module must be the same version.

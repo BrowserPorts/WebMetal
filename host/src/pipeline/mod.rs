@@ -30,7 +30,7 @@
 //! **The compiler.** The `airwgsl` crate is a git dependency of this crate pinned to a commit of the AirWgsl
 //! repository (`host/Cargo.toml`); it has no dependencies of its own and builds for the native targets and for
 //! wasm32 alike. A local AirWgsl checkout is used instead by patching the source in an untracked
-//! `.cargo/config.toml` (`[patch."https://github.com/MovByte/AirWgsl"] airwgsl = { path = "..." }`), which also
+//! `.cargo/config.toml` (`[patch."https://github.com/BrowserPorts/AirWgsl"] airwgsl = { path = "..." }`), which also
 //! rewrites `Cargo.lock` for that build.
 //!
 //! **Asynchronous creation.** The asynchronous Metal methods are asynchronous in the guest, which runs the completion
