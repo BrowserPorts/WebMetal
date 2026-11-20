@@ -108,6 +108,18 @@ build/macos/wmref run --out RUN
 
 `tests/reference/README.md` covers it.
 
+Some generated files are committed because their generators are Python
+scripts, and some read specifications they fetch and pin by hash, which a
+Cargo build does not assume. Each generator's `--check` regenerates in memory
+and fails when a committed file differs: `wire/gen/wiregen.py` (the wire
+protocol's header, fuzz header, opcode table and Rust),
+`host/src/exec/gen/execgen.py` (`host/src/exec/schema.rs`),
+`host/src/format/gen/formatgen.py` (`host/src/format/table.rs`),
+`host/gen/gpugen.py --cache DIR` (the WebGPU IDL tables), and
+`tables/check.py --cache DIR` (`tables/formats.toml`, `limits.toml` and
+`refusals.md`). `host/src/format/vectors/gen_vectors.py` writes the CTS
+vectors from a checkout of Khronos's VK-GL-CTS, whose sources the files pin.
+
 ## Making the device data
 
 The tools take your own root file system and write where you tell them, by
