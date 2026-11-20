@@ -22,6 +22,10 @@
 //!   answers.
 //!
 //! A value missing, of the wrong type, or disagreeing with its flag word stops the build.
+//!
+//! The guest plugin answers the device's capability getters from the same file: guest/gen/profilegetters.py turns
+//! `[getters]`, `[driver_getters]`, `[queries."<selector>"]` (with `[query_failures]`) and `[heap]` into the plugin's
+//! methods, each with the provenance comment its value carries in the profile.
 
 /// A pixel format record of the profile (`[pixel_formats.N]`): the formats `MTLPixelFormatGetInfoForDevice` knows for
 /// the device, with the flag word at offset 8 of `MTLPixelFormatInfo`.
