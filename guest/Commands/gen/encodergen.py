@@ -282,6 +282,9 @@ class Method:
 
 def generate():
     schema = tomllib.loads(SCHEMA.read_text())
+    if not SURFACE.exists():
+        fail(f'{SURFACE.relative_to(ROOT)} is missing: it is made from the user\'s own 21H461 root '
+             '(guest/Plugin/WebMetalSurface.h)')
     selectors = driver_selectors(SURFACE.read_text())
     ops = {}
     for op in schema['op']:
