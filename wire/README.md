@@ -12,8 +12,6 @@ executor exchange, and the accelerator service that carries them.
 | `generated/WebMetalWireFuzz.h` | C++ random-record generators and comparisons used by the cross-language tests. |
 | `generated/opcodes.md` | The opcode table. |
 | `src/` | The `webmetal-wire` crate: `generated.rs` (generated) over a hand-written codec, property-list value and random-value runtime. |
-| `tools/target_surface.py` | Derives the Metal driver surface of iPadOS 17.7.11 (21H461) and checks the schema against it. |
-| `target/quartzcore-driver-selectors.tsv` | The QuartzCore driver-selector list that tool derives. |
 | `tests/` | Round trips, golden encodings, malformed input, schema hash, and the C++/Rust cross-language round trip. |
 
 ## Records
@@ -128,15 +126,11 @@ created when the client cannot be opened or either read fails. `maxBufferLength`
 (+0x28); `recommendedMaxWorkingSetSize` and `sharedMemorySize` are its wired limit (+0x20); `supportPriorityBand` is bit
 6 of its bits (+0x0).
 
-## Checking the schema against 21H461
+## The schema and 21H461
 
-```sh
-python3 -B -I wire/tools/target_surface.py --root <21H461 root file system> check
-python3 -B -I wire/tools/target_surface.py --root <21H461 root file system> derive --write
-```
-
-The tool reads the target's dyld shared cache read-only, decodes the Objective-C metadata of Metal.framework,
-IOGPU.framework, the AGX driver bundle and QuartzCore, and checks:
+The schema follows the Objective-C metadata of Metal.framework, IOGPU.framework, the AGX driver bundle and QuartzCore
+on 21H461. The check that reads them from a dyld shared cache runs on the user's own root and is not part of this
+repository; it holds the schema to these rules:
 
 - every op's arguments against the 21H461 extended method type encoding of each Metal method it carries;
 - that every Metal method an op carries is implemented by the driver layers (the AGX bundle or IOGPU.framework, which
@@ -146,16 +140,15 @@ IOGPU.framework, the AGX driver bundle and QuartzCore, and checks:
 - every guest-local annotation, verifying the reasons the binaries can prove: `framework` (only Metal.framework
   implements it), `absent` (an optional method no driver layer implements), `unavailable` (no driver layer implements
   it; API_UNAVAILABLE on iOS), `unreachable` (the factory that would hand out the object is itself absent);
-- that `target/quartzcore-driver-selectors.tsv` equals a fresh derivation;
 - that every QuartzCore driver selector declared by an `MTL*CommandEncoder`, `MTLDevice` or `MTLDeviceSPI` protocol has
   an opcode or a guest-local annotation.
 
-It prints the remaining backlog: driver-protocol methods that have neither an opcode nor a guest-local annotation
-yet. Those are not served; the guest plugin's generated stubs report them as not implemented.
+Driver-protocol methods that have neither an opcode nor a guest-local annotation yet are not served; the guest
+plugin's generated stubs report them as not implemented.
 
-The QuartzCore list is QuartzCore's `__objc_selrefs` intersected with the selectors the driver implements or the
-`MTL*` protocols declare, without runtime-generated and root-class selectors; see the tool's docstring for the exact
-definition. A selector reference shows that QuartzCore can send the message, not to which receiver.
+The QuartzCore driver selectors are QuartzCore's `__objc_selrefs` intersected with the selectors the driver implements
+or the `MTL*` protocols declare, without runtime-generated and root-class selectors. A selector reference shows that
+QuartzCore can send the message, not to which receiver.
 
 ## Generating and testing
 

@@ -5,10 +5,9 @@
 # (wire/generated/opcodes.md). Hand-written copies of any of them are forbidden. The protocol version is the SHA-256 of
 # this file's bytes; both ends exchange it in Open and refuse a connection whose hash differs.
 #
-# wire/tools/target_surface.py checks this file against the iPadOS 17.7.11 (21H461) binaries: every op's arguments
-# against the extended type encoding of each Metal method it lists, every descriptor struct against its class's
-# settable state, every guest-local annotation against the declaring protocol and the implementing layer, and coverage of
-# the QuartzCore driver-selector list (wire/target/quartzcore-driver-selectors.tsv).
+# This file follows the iPadOS 17.7.11 (21H461) binaries (wire/README.md): every op's arguments match the extended type
+# encoding of each Metal method it lists, every descriptor struct the settable state of its class, every guest-local
+# annotation the declaring protocol and the implementing layer, and the QuartzCore driver selectors are covered.
 #
 # Field syntax: "name: type", optionally followed by " (MetalType)" naming the Metal enum or typedef the raw value
 # belongs to, and by " = expr" stating that an array, byte string or string has exactly as many elements as the value of
@@ -3430,8 +3429,8 @@ args = ["failure: Failure"]
 doc = "The host GPU device was lost. Every in-flight and later command buffer completes with an error."
 
 # Guest-local methods: driver-protocol methods that have no record because the guest answers them without the host.
-# reason is one of the values target_surface.py defines (profile, object-state, framework, guest-runtime, guest-memory,
-# kernel-object, unreachable, absent, unavailable); framework, absent, unavailable and unreachable are verified against
+# reason is one of profile, object-state, framework, guest-runtime, guest-memory, kernel-object, unreachable, absent and
+# unavailable; framework, absent, unavailable and unreachable are verified against
 # the 21H461 implementation layers. protocols = ["*"] means every MTL* protocol that declares the selector.
 
 [[local]]
