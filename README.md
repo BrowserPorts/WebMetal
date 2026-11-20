@@ -46,7 +46,7 @@ lists those cases, each with the clause of the specification that blocks it.
 | `host/` | the `webmetal-host` crate, the executor |
 | `host/embed-ref/` | a reference embedder, which runs the executor without a kernel and replays recordings |
 | `host/web-tests/` | the executor's tests built as browser modules |
-| device profile | not in the repository: the answers of the Metal device WebMetal presents, a TOML file you supply. `WEBMETAL_PROFILE` names it when the host builds, and `host/src/format/profile.rs` describes its fields |
+| `profile/` | the tools that extract the device profile (the answers of the Metal device WebMetal presents) and the driver's texture format table from your own root. The profile is not in the repository: `WEBMETAL_PROFILE` names your copy when the host builds, and `host/src/format/profile.rs` describes its fields |
 | `tables/` | the specification tables (formats, limits, refusals), each row with its source, `check.py`, which verifies them, and in `measure/` the programs that take the measurements some rows cite |
 | `tests/reference/` | `wmref`, small Objective-C programs that record what real Metal does, as the reference the executor is tested against |
 
@@ -59,10 +59,12 @@ your own device:
 - `WEBMETAL_PROFILE`: the path of the device profile.
 - `WEBMETAL_AGX_TEXTURE_FORMATS`: the path of the A10X driver's texture
   format table, in the Rust form `host/src/mem/agx/mod.rs` describes.
-- For the guest plugin, `guest/Generated/`: the target surface, the format
-  table's C++ form, and the driver bundle's `Info.plist` and resource rules.
-  `guest/Plugin/WebMetalSurface.h` lists them, and
-  `guest/gen/profilegetters.py` writes the profile's getters there.
+- For the guest plugin, `guest/Generated/`: the target surface and the
+  format table's C++ form. `guest/Plugin/WebMetalSurface.h` lists them;
+  `guest/gen/profilegetters.py` writes the profile's getters there and
+  `guest/Commands/gen/encodergen.py` the encoder records next to their
+  sources. The plugin's build takes the driver bundle's `Info.plist` and
+  resource rules from your root.
 
 The build fails, naming what is missing, when any of them is absent.
 
@@ -105,6 +107,36 @@ build/macos/wmref run --out RUN
 ```
 
 `tests/reference/README.md` covers it.
+
+## Making the device data
+
+The tools take your own root file system and write where you tell them, by
+default to paths Git ignores. Each takes `--help`. They were checked on
+iPadOS 17.7.11 (21H461) for the A10X (`AGXMetalA10`, `AGXA10XDevice`); the
+root, its build and the driver are arguments. They need Python 3.11 or newer.
+
+- The device profile: UniXNU's `scripts/audit-target-metal-profile.py` runs
+  `profile/webmetal_profile` (with the `unicorn` package and LLVM's
+  `llvm-mc`) and writes `profile/device-profile.toml`, for
+  `WEBMETAL_PROFILE`. `python3 -m unittest discover -s profile/tests` checks
+  the package, and the profile `WEBMETAL_PROFILE` names.
+- The texture format table, from `profile/`:
+
+  ```sh
+  python3 -B -m webmetal_profile.texture_formats <root>/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64 \
+      --driver AGXMetalA10 --build "iPadOS 17.7.11, 21H461"
+  ```
+
+  It writes `guest/Generated/WebMetalTextureFormats.inc` and
+  `guest/Generated/agx-texture-formats.rs`, for
+  `WEBMETAL_AGX_TEXTURE_FORMATS`.
+- The target surface and the system clients' lists: UniXNU's
+  `scripts/audit-target-web-metal-surface.py` writes `guest/Generated/` and
+  `guest/SPI/clients/`.
+- The QuartzCore driver-selector list and the check of the wire schema
+  against the binaries: `wire/tools/target_surface.py --root <root> --driver
+  /System/Library/Extensions/AGXMetalA10.bundle/AGXMetalA10 --build 21H461
+  derive --write` (then `check`); `wire/README.md` describes the check.
 
 ## Using it
 

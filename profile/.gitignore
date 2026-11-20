@@ -1,0 +1,4 @@
+__pycache__/
+# The device profile is extracted from the user's own root and stays with the user (WEBMETAL_PROFILE); never
+# committed.
+*.toml

@@ -11,6 +11,7 @@ executor exchange, and the accelerator service that carries them.
 | `generated/WebMetalWire.h` | C++17 / Objective-C++ header for the guest: encoders for requests and stream records, decoders for replies and events, Foundation conversions. |
 | `generated/WebMetalWireFuzz.h` | C++ random-record generators and comparisons used by the cross-language tests. |
 | `generated/opcodes.md` | The opcode table. |
+| `tools/target_surface.py` | Derives the Metal driver surface from the user's own root and checks the schema against it. |
 | `src/` | The `webmetal-wire` crate: `generated.rs` (generated) over a hand-written codec, property-list value and random-value runtime. |
 | `tests/` | Round trips, golden encodings, malformed input, schema hash, and the C++/Rust cross-language round trip. |
 
@@ -128,9 +129,14 @@ created when the client cannot be opened or either read fails. `maxBufferLength`
 
 ## The schema and 21H461
 
-The schema follows the Objective-C metadata of Metal.framework, IOGPU.framework, the AGX driver bundle and QuartzCore
-on 21H461. The check that reads them from a dyld shared cache runs on the user's own root and is not part of this
-repository; it holds the schema to these rules:
+```sh
+python3 -B -I wire/tools/target_surface.py --root <root> --driver <driver executable in the cache> --build <build> check
+python3 -B -I wire/tools/target_surface.py --root <root> --driver <driver executable in the cache> --build <build> derive --write
+```
+
+The tool reads the dyld shared cache of the user's own root read-only (checked on 21H461 with
+`/System/Library/Extensions/AGXMetalA10.bundle/AGXMetalA10`), decodes the Objective-C metadata of Metal.framework,
+IOGPU.framework, the AGX driver bundle and QuartzCore, and checks:
 
 - every op's arguments against the 21H461 extended method type encoding of each Metal method it carries;
 - that every Metal method an op carries is implemented by the driver layers (the AGX bundle or IOGPU.framework, which
@@ -140,6 +146,8 @@ repository; it holds the schema to these rules:
 - every guest-local annotation, verifying the reasons the binaries can prove: `framework` (only Metal.framework
   implements it), `absent` (an optional method no driver layer implements), `unavailable` (no driver layer implements
   it; API_UNAVAILABLE on iOS), `unreachable` (the factory that would hand out the object is itself absent);
+- that the QuartzCore driver-selector list (`--list`, by default `target/quartzcore-driver-selectors.tsv`, which Git
+  ignores) equals a fresh derivation;
 - that every QuartzCore driver selector declared by an `MTL*CommandEncoder`, `MTLDevice` or `MTLDeviceSPI` protocol has
   an opcode or a guest-local annotation.
 
