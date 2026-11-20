@@ -289,8 +289,17 @@ pub fn encode(r: &Request) -> Vec<u8> {
 
 // Metal reference outputs ------------------------------------------------------------------------------------------
 
-/// The reference device whose outputs the tests compare with.
-pub const GOLDEN_DEVICE: &str = "apple-m4-macos-27.0.1-26a434";
+/// The run of the reference harness `WEBMETAL_REFERENCE` names (build.rs): the tests that compare with it are ignored
+/// without it, naming the variable, and fail naming it when run anyway.
+#[cfg(webmetal_reference)]
+fn reference_dir() -> PathBuf {
+    PathBuf::from(env!("WEBMETAL_REFERENCE_DIR"))
+}
+
+#[cfg(not(webmetal_reference))]
+fn reference_dir() -> PathBuf {
+    panic!("WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")
+}
 
 /// A case of the Metal reference outputs (release variant): one record per line.
 pub struct Golden {
@@ -299,11 +308,7 @@ pub struct Golden {
 
 impl Golden {
     pub fn load(case: &str) -> Golden {
-        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../tests/reference/goldens")
-            .join(GOLDEN_DEVICE)
-            .join("release")
-            .join(format!("{case}.json"));
+        let path = reference_dir().join("release").join(format!("{case}.json"));
         let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
         Golden { text }
     }

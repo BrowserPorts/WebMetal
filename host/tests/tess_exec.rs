@@ -1,7 +1,7 @@
 //! Patch draws through the executor on a native WebGPU implementation (`WEBGPU_NATIVE`, see `host/build.rs`): the
 //! pipeline service compiling the reference library's post-tessellation vertex functions, the render path
 //! tessellating each draw before its pass (`webmetal_host::tess`), and the targets compared with what Metal drew
-//! (`tests/reference/goldens`, `tessellation.render`). Patch draws Metal leaves undefined, and the triangle order the
+//! (`WEBMETAL_REFERENCE`, `tessellation.render`). Patch draws Metal leaves undefined, and the triangle order the
 //! executor does not reproduce, fail their command buffers.
 
 #![cfg(feature = "native")]
@@ -340,6 +340,7 @@ fn render(h: &Harness, p: Handle, d: &Draw, b: &Buffers, body: Vec<Command>) -> 
 /// whose command buffer fails naming the order it does not reproduce. The draw whose fragment function reads a swizzled
 /// texture is drawn with the pipeline compiled for the texture it binds, as an ordinary draw is.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn rendered_patch_draws_equal_metal_s_targets() {
     let h = Harness::new();
     let lib = reference_library();
@@ -450,6 +451,7 @@ fn patch_draws_metal_leaves_undefined_fail_loudly() {
 /// Scaling enabled on an encoder that never sets a scale culls every patch (tessellation.factors scale-unset): the
 /// draw succeeds and draws nothing; the same draw after setTessellationFactorScale: draws.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn an_unset_factor_scale_culls_every_patch() {
     let h = Harness::new();
     let lib = reference_library();

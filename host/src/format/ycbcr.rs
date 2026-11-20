@@ -105,6 +105,7 @@ mod tests {
     /// The luma of the reference cases: the harness's ideal values are `Y / 255` of the bytes in Metal's order, and the
     /// device's luma reads equal `Y / 255` correctly rounded.
     #[test]
+    #[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
     fn luma_matches_real_metal() {
         use crate::format::packed::unorm_to_f32;
         use crate::format::testdata::{Case, hex_bytes};

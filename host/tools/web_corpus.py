@@ -9,7 +9,8 @@ and posts each outcome back; a case passes when its test function returns, exact
 
 Usage:
   web_corpus.py run [--browser chrome|chrome-headless|firefox|safari|PATH] [--modules a,b] [--case module.name] [--out RESULTS]
-                    [--build DIR] [--no-build] [--reference-build DIR] [--timeout SECONDS] [--total SECONDS]
+                    [--build DIR] [--no-build] [--reference-build DIR] [--reference-outputs DIR]
+                    [--timeout SECONDS] [--total SECONDS]
   web_corpus.py table RESULTS... [--native NAME=LOG ...]
 
 Browsers:
@@ -20,10 +21,12 @@ Browsers:
            `javascript.options.wasm_js_promise_integration`, which the profile sets.
   safari   Safari, through `open -a Safari`: Safari has no headless mode and no profile of its own for a run.
 
-The tests' own requirements hold here as natively: the case files of tests/reference/goldens, and Xcode's Metal
-toolchain for the reference library (or --reference-build naming a build of `tests/reference/build.py --platform
-ios`). The wasm-bindgen CLI on PATH must be the version host/Cargo.toml pins. Exit status: 0 when every case passed,
-1 when one did not, 2 when the run could not complete.
+The tests' own requirements hold here as natively: the Metal reference outputs, a run of the reference harness the
+user recorded on real Metal (--reference-outputs, or WEBMETAL_REFERENCE as for the native build; the run stops
+without it), which the page reads under __reference/, and Xcode's Metal toolchain for the reference library (or
+--reference-build naming a build of `tests/reference/build.py --platform ios`). The wasm-bindgen CLI on PATH must be
+the version host/Cargo.toml pins. Exit status: 0 when every case passed, 1 when one did not, 2 when the run could not
+complete.
 """
 
 import argparse
@@ -112,7 +115,7 @@ class Run:
             json.dump(data, f, indent=1)
 
 
-def serve(build_dir, reference_dir, run, browser):
+def serve(build_dir, reference_dir, outputs_dir, run, browser):
     class Handler(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *a, **kw):
             super().__init__(*a, directory=ROOT, **kw)
@@ -127,6 +130,8 @@ def serve(build_dir, reference_dir, run, browser):
                 return os.path.join(build_dir, *rest)
             if parts[:2] == ["__build", "reference-ios"]:
                 return os.path.join(reference_dir, *parts[2:])
+            if parts[:1] == ["__reference"]:
+                return os.path.join(outputs_dir, *parts[1:])
             return os.path.join(ROOT, *parts)
 
         def end_headers(self):
@@ -136,7 +141,11 @@ def serve(build_dir, reference_dir, run, browser):
         def do_GET(self):
             p = urllib.parse.unquote(urllib.parse.urlsplit(self.path).path)
             if p.startswith("/__list/"):
-                d = os.path.join(ROOT, *[x for x in p[len("/__list/"):].split("/") if x and x not in (".", "..")])
+                parts = [x for x in p[len("/__list/"):].split("/") if x and x not in (".", "..")]
+                if parts[:1] == ["__reference"]:
+                    d = os.path.join(outputs_dir, *parts[1:])
+                else:
+                    d = os.path.join(ROOT, *parts)
                 if not os.path.isdir(d):
                     self.send_error(404)
                     return
@@ -224,10 +233,16 @@ def run_main(args):
     os.makedirs(out, exist_ok=True)
     if not args.no_build:
         build(args, out)
+    outputs_dir = args.reference_outputs
+    if not outputs_dir:
+        raise SystemExit("the Metal reference outputs are not supplied: give --reference-outputs or set "
+                         "WEBMETAL_REFERENCE to a run of the reference harness")
+    if not os.path.isdir(os.path.join(outputs_dir, "release")):
+        raise SystemExit("%s is not a run of the reference harness (no release/)" % outputs_dir)
     reference_dir = reference(args, out)
     results = args.out or os.path.join(out, "results-%s.json" % args.browser)
     run = Run(results)
-    httpd = serve(out, reference_dir, run, args.browser)
+    httpd = serve(out, reference_dir, os.path.abspath(outputs_dir), run, args.browser)
     modules = args.modules or ",".join(MODULES)
     query = {"modules": modules, "timeout": str(args.timeout)}
     if args.case:
@@ -337,6 +352,8 @@ def main():
     r.add_argument("--build", help="build into this directory and keep it")
     r.add_argument("--no-build", action="store_true", help="use the modules already in --build")
     r.add_argument("--reference-build", help="a build directory of tests/reference/build.py --platform ios")
+    r.add_argument("--reference-outputs", default=os.environ.get("WEBMETAL_REFERENCE"),
+                   help="the Metal reference outputs: a run of the reference harness (default: $WEBMETAL_REFERENCE)")
     r.add_argument("--out", help="write the results here (JSON)")
     r.add_argument("--timeout", type=float, default=900, help="seconds a case may take")
     r.add_argument("--total", type=float, default=4 * 3600, help="seconds the whole run may take")

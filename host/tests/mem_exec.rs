@@ -400,6 +400,7 @@ fn region(w: u64, h: u64) -> Region {
 /// replaceRegion and getBytes of shared textures through the executor, for every format with a reference
 /// `upload-read` case, compared with the reference readback.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn texture_cpu_access_through_the_executor() {
     let h = Harness::new();
     let mut exact = 0;
@@ -495,6 +496,7 @@ fn counter_sample_buffers_are_counted_per_system() {
 
 /// `resource.purgeable-state` and the heap and aliasing rules through the executor.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn purgeable_state_and_heaps_through_the_executor() {
     let golden = Golden::load("resource.purgeable-state");
     let h = Harness::new();
@@ -654,6 +656,7 @@ fn shared_buffers_through_the_executor() {
 /// `storage.iosurface-texture`: CPU writes to a surface reach a blit that reads its texture; a blit that writes the
 /// texture reaches the CPU's view of the surface, as on real Metal.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn iosurface_texture_matches_metal() {
     let golden = Golden::load("storage.iosurface-texture");
     let h = Harness::new();
@@ -741,6 +744,7 @@ fn iosurface_texture_matches_metal() {
 /// 64-byte linear alignment): the CPU's bytes in the buffer are what a blit reads from the texture, and a blit that
 /// writes the texture lands in the buffer's bytes, with the bytes between rows untouched.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn buffer_backed_texture_through_the_executor() {
     let golden = Golden::load("storage.buffer-backed-texture");
     let h = Harness::new();
@@ -906,6 +910,7 @@ fn layout_fill(h: &Harness, d: &TextureDescriptor) -> (u64, u64, Vec<Vec<u8>>) {
 /// copies fill memory in the A10X layout and read back what the reference read back; a region the driver refuses
 /// copies nothing and the reply carries the driver's assertion.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn texture_layout_copies_through_the_executor() {
     let golden = Golden::load("spi.texture-layout-copies");
     let h = Harness::new();

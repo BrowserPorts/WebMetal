@@ -10,7 +10,7 @@ A citation is an inline table in one of these forms:
   { sdk = PATH, quote = TEXT }            TEXT occurs in the SDK header PATH, pinned in
                                           the "sdk" source (or absent = TERM: it does not).
   { measure = ID, case = CASE, quote = TEXT }
-                                          the committed result of measurement ID records
+                                          the result of measurement ID records
                                           CASE, and TEXT occurs in that case's record.
   { target = KIND, ... }                  a fact read from the target root's binaries or
                                           headers; checked only when the root is given.
@@ -27,13 +27,16 @@ import specdoc
 
 class Checker:
     def __init__(self, sources, cache, measures=None, root=None):
+        """measures: {measurement id: {case id: text}} from the records the user supplies, or None when none
+        are supplied: measurement citations are then counted in `skipped`, not checked."""
         self.sources = sources
         self.cache = cache
-        self.measures = measures or {}
+        self.measures = measures
         self.root = root
         self.errors = []
         self.checked = 0
         self.unverified = 0
+        self.skipped = 0
 
     def fail(self, where, msg):
         self.errors.append("%s: %s" % (where, msg))
@@ -68,6 +71,9 @@ class Checker:
                 self.fail(where, "SDK citation without a quote or absent term")
             return
         if "measure" in c:
+            if self.measures is None:
+                self.skipped += 1
+                return
             m = self.measures.get(c["measure"])
             if m is None:
                 self.fail(where, "unknown measurement %s" % c["measure"])

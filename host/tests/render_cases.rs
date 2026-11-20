@@ -1,6 +1,6 @@
 //! The render rows of the Metal reference harness (`tests/reference/src/cases`: Raster.m, Draw.m, DepthStencil.m,
 //! Blend.m, RenderPass.m, RenderFragment.m, Formats.m), replayed through the executor on a native WebGPU
-//! implementation and compared with the outputs real Metal recorded (`tests/reference/goldens`, release variant) under
+//! implementation and compared with the outputs real Metal recorded (`WEBMETAL_REFERENCE`, release variant) under
 //! the rules of `tests/reference/FORMAT.md`.
 //!
 //! Each test is one reference case: the same resources, pipelines, passes and draws, sent as the guest sends them
@@ -100,6 +100,7 @@ const MARGIN: f64 = 1.0 / 16.0;
 // Raster.m ------------------------------------------------------------------------------------------------------------
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_triangle_coverage() {
     let h = Harness::new();
     let tris = [
@@ -128,6 +129,7 @@ fn raster_triangle_coverage() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_edge_ties() {
     let h = Harness::new();
     let tris = [[4.5, 4.5, 11.5, 4.5, 11.5, 11.5], [4.5, 4.5, 11.5, 11.5, 4.5, 11.5]];
@@ -160,6 +162,7 @@ fn raster_edge_ties() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_lines() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_triangles", "rnd_fragment_id", pf::R32_UINT);
@@ -177,6 +180,7 @@ fn raster_lines() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_cull_winding() {
     let h = Harness::new();
     let tris = [
@@ -214,6 +218,7 @@ fn raster_cull_winding() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_viewport() {
     let h = Harness::new();
     let corners = [[-1.0f32, -1.0], [3.0, -1.0], [-1.0, 3.0]];
@@ -262,6 +267,7 @@ fn raster_viewport() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_scissor() {
     let h = Harness::new();
     let b = vertex_buffer(&h, &triangle_vertices(&[[-1.0, -1.0, 40.0, -1.0, -1.0, 40.0]], &[5], 16, 16));
@@ -279,6 +285,7 @@ fn raster_scissor() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn raster_depth_clip_clamp() {
     let h = Harness::new();
     let mut quads = Vec::new();
@@ -375,6 +382,7 @@ fn ids_pipeline(h: &Harness) -> Handle {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn draw_vertex_instance_ids() {
     let h = Harness::new();
     let p = ids_pipeline(&h);
@@ -431,6 +439,7 @@ fn indexed(
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn draw_indexed() {
     let h = Harness::new();
     let p = ids_pipeline(&h);
@@ -462,6 +471,7 @@ fn draw_indexed() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn draw_primitive_restart() {
     let h = Harness::new();
     let corners = [[1.0, 1.0], [1.0, 5.0], [7.0, 1.0], [7.0, 5.0], [9.0, 8.0], [9.0, 14.0], [14.0, 8.0], [14.0, 14.0]];
@@ -513,6 +523,7 @@ fn draw_primitive_restart() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn draw_indirect() {
     let h = Harness::new();
     let p = ids_pipeline(&h);
@@ -600,6 +611,7 @@ fn fetch_uint_pipeline(h: &Harness, stride: u64) -> Handle {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn vertex_bytes_and_buffer_offset() {
     let h = Harness::new();
     let p = fetch_uint_pipeline(&h, 8);
@@ -638,6 +650,7 @@ fn vertex_bytes_and_buffer_offset() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn vertex_attribute_stride() {
     let h = Harness::new();
     let p = fetch_uint_pipeline(&h, u64::MAX);
@@ -704,6 +717,7 @@ fn fetch_two_pipeline(h: &Harness, step2: u64, rate2: u64) -> Handle {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn vertex_step_functions() {
     let h = Harness::new();
     let pv: Vec<u32> = (0..16).flat_map(|i| [100 + i, 200 + i]).collect();
@@ -737,6 +751,7 @@ fn vertex_step_functions() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn vertex_step_base_instance() {
     let h = Harness::new();
     let pv: Vec<u32> = (0..4).flat_map(|i| [i, i]).collect();
@@ -792,6 +807,7 @@ fn ds_aspect(h: &Harness, c: &mut Candidate, name: &str, t: Handle, stencil: boo
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_compare_functions() {
     let h = Harness::new();
     let mut d = h.pipeline_of("rnd_vertex_triangles", Some("rnd_fragment_id"), pf::R32_UINT);
@@ -828,6 +844,7 @@ fn depth_stencil_compare_functions() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_stencil_operations() {
     let h = Harness::new();
     let mut d = h.pipeline_of("rnd_vertex_triangles", Some("rnd_fragment_id"), pf::R32_UINT);
@@ -891,6 +908,7 @@ fn depth_stencil_stencil_operations() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_stencil_read_mask() {
     let h = Harness::new();
     let mut d = h.pipeline_of("rnd_vertex_triangles", Some("rnd_fragment_id"), pf::R32_UINT);
@@ -935,6 +953,7 @@ fn depth_stencil_stencil_read_mask() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_separate_front_back() {
     let h = Harness::new();
     let (w, hh) = (16u64, 8u64);
@@ -1000,6 +1019,7 @@ fn depth_stencil_separate_front_back() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_fragment_depth() {
     let h = Harness::new();
     let state = h.depth_stencil(depth_stencil_descriptor(7, true));
@@ -1035,6 +1055,7 @@ fn depth_stencil_fragment_depth() {
 /// `depth-stencil.depth-bias`: the unbiased draws run; the first biased draw is refused, since Metal does not define
 /// the bias formula and the A10X's is not measured (`tables/limits.toml` question `6.4-depth-bias-formula`).
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_depth_bias() {
     let h = Harness::new();
     let state = h.depth_stencil(depth_stencil_descriptor(7, true));
@@ -1249,6 +1270,7 @@ fn record_states(h: &Harness, c: &mut Candidate, name: &str, states: &[BState], 
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn blend_factors_operations() {
     let h = Harness::new();
     let mut states = Vec::new();
@@ -1267,6 +1289,7 @@ fn blend_factors_operations() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn blend_dual_source() {
     let h = Harness::new();
     let mut states = Vec::new();
@@ -1283,6 +1306,7 @@ fn blend_dual_source() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn blend_write_mask() {
     let h = Harness::new();
     let masks = [0u64, 8 | 1, 4 | 2, 0xf];
@@ -1415,6 +1439,7 @@ fn draw_ms(h: &Harness, pipeline: Handle, sample_mask: u32) -> Vec<u32> {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn msaa_coverage_4x() {
     let h = Harness::new();
     if !multisamples(&h, "msaa.coverage-4x", MS_COLOR) {
@@ -1442,6 +1467,7 @@ fn msaa_coverage_4x() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn msaa_color_resolve() {
     let h = Harness::new();
     if !multisamples(&h, "msaa.color-resolve", pf::RGBA16_FLOAT) {
@@ -1548,6 +1574,7 @@ fn depth_resolve(h: &Harness, stencil_too: bool, filters: &[(u64, u64, &str)], c
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn msaa_depth_resolve() {
     let h = Harness::new();
     if !multisamples(&h, "msaa.depth-resolve", MS_COLOR) {
@@ -1563,6 +1590,7 @@ fn msaa_depth_resolve() {
 /// filters). The `sample0` resolve, which the A10X supports (`supportsMSAAStencilResolve`), is checked against the
 /// reference's records.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn msaa_depth_stencil_resolve_sample0() {
     let h = Harness::new();
     if !multisamples(&h, "msaa.depth-stencil-resolve", MS_COLOR) {
@@ -1580,6 +1608,7 @@ fn msaa_depth_stencil_resolve_sample0() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn msaa_alpha_to_coverage() {
     let h = Harness::new();
     if !multisamples(&h, "msaa.alpha-to-coverage", pf::RGBA16_FLOAT) {
@@ -1674,6 +1703,7 @@ fn cover(h: &Harness, w: u64, hh: u64, z: f64, id: u32) -> Handle {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pass_load_store_actions() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_triangles", "rnd_fragment_id", pf::R32_UINT);
@@ -1712,6 +1742,7 @@ fn pass_load_store_actions() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pass_clear_values() {
     let h = Harness::new();
     let mut c = Candidate::default();
@@ -1747,6 +1778,7 @@ fn pass_clear_values() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pass_store_action_deferred() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_triangles", "rnd_fragment_id", pf::R32_UINT);
@@ -1786,6 +1818,7 @@ fn pass_error_store_action_unknown_unset() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pass_parallel_encoder_order() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_triangles", "rnd_fragment_id", pf::R32_UINT);
@@ -1854,6 +1887,7 @@ fn memoryless_draw(h: &Harness, depth_store: u64) -> (Failure, Handle) {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pass_memoryless_depth() {
     let h = Harness::new();
     let (f, color) = memoryless_draw(&h, 0);
@@ -1874,6 +1908,7 @@ fn pass_error_memoryless_store() {
 /// `pass.visibility-results`: the boolean results are measured; the counting mode that follows in the same encoder is
 /// refused (`tables/refusals.md` row `counting-occlusion`).
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pass_visibility_results() {
     let h = Harness::new();
     let mut d = h.pipeline_of("rnd_vertex_triangles", Some("rnd_fragment_id"), pf::R32_UINT);
@@ -1972,6 +2007,7 @@ fn pass_error_visibility_offsets() {
 
 /// `storage.memoryless-depth` (Storage.m): a memoryless depth attachment cleared, tested and discarded in one pass.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn storage_memoryless_depth() {
     let h = Harness::new();
     let rgba8_uint = 73;
@@ -2170,6 +2206,7 @@ fn unimplemented_records_are_reported() {
 // RenderFragment.m ----------------------------------------------------------------------------------------------------
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn render_discard() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_triangles", "rnd_fragment_discard", pf::R32_UINT);
@@ -2187,6 +2224,7 @@ fn render_discard() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn render_interpolation() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_interpolated", "rnd_fragment_interpolated", pf::RGBA32_UINT);
@@ -2227,6 +2265,7 @@ fn render_interpolation() {
 /// `render.framebuffer-fetch`: the per-primitive pass plan of plan section 5.9 (the fetching shader is the compiler's;
 /// here a translation that reads the snapshot binding the plan defines).
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn render_framebuffer_fetch() {
     let h = Harness::new();
     let p = h.simple_pipeline("rnd_vertex_triangles", "rnd_fragment_fetch", pf::R32_UINT);
@@ -2282,6 +2321,7 @@ fn render_error_memory_barrier_after_fragment() {
 /// Every `format.<format>.render` case whose format the host stores natively and renders: the reference's recorded
 /// input values are drawn through the case's pipeline and the stored texels compared.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn format_render() {
     let h = Harness::new();
     let mut names: Vec<String> =

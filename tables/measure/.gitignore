@@ -1,0 +1,3 @@
+# Measurement records describe the machine they were taken on and stay with the user (tables/check.py,
+# --measurements, and the tests: WEBMETAL_MEASUREMENTS); never committed.
+*.toml

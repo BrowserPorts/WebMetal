@@ -1,6 +1,6 @@
 //! The pipeline service through the executor on a native WebGPU implementation (`WEBGPU_NATIVE`, see `host/build.rs`):
 //! the guest's records for the reference library's functions and pipelines, the compute encoder running what they
-//! create, and the Metal reference outputs (`tests/reference/goldens`) where Metal defines the result.
+//! create, and the Metal reference outputs (`WEBMETAL_REFERENCE`, mem_common) where Metal defines the result.
 //!
 //! The pipeline-creation corpus is the reference library's kernels and pipeline cases and, with `WEBMETAL_CORPUS`
 //! naming AirWgsl's generated corpus build (`corpus/build.py`: `modules.tsv` and `air/`), its kernels. Every creation
@@ -109,6 +109,7 @@ fn reference_kernels_create_as_the_compiler_decides_and_cache_hits_are_equal() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn the_marker_kernel_writes_metal_s_values_from_fresh_and_cached_pipelines() {
     let h = Harness::new();
     let lib = reference_library();
@@ -237,6 +238,7 @@ fn registration_follows_the_protocol() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn binary_archives_hold_what_was_added() {
     // archive.round-trip and archive.invalid-file.
     let h = Harness::new();
@@ -529,6 +531,7 @@ fn a_compiled_render_pipeline_draws_through_the_render_encoder() {
 /// the snapshot binding the compiler describes, the pass plan draws each primitive after a snapshot (plan section
 /// 5.9), and the result equals Metal's.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn the_compiler_s_framebuffer_fetch_plan_draws_metal_s_result() {
     use pipeline_common::render_descriptor;
     let h = Harness::new();
@@ -782,6 +785,7 @@ fn mem_common_pattern(len: usize, seed: u32) -> Vec<u8> {
 /// with each pipeline compiled for the textures the draw binds (their storage formats, level counts and swizzles), and
 /// every `exact` record equals Metal's.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn fragment_functions_access_textures_as_metal_does() {
     use pipeline_common::render_descriptor;
     const RGBA8_UINT: u64 = 73;

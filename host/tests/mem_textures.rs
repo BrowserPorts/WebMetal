@@ -282,6 +282,7 @@ fn golden_input(g: &Golden) -> Option<(Vec<u8>, u64, u64, u64)> {
 /// of a shared texture and through blits to and from a private texture, on a device with every feature the adapter
 /// offers and on one with none, compared with the Metal reference outputs.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn upload_readback_matrix() {
     let mut report = String::new();
     let mut counts = std::collections::BTreeMap::<&str, usize>::new();
@@ -678,6 +679,7 @@ fn texture_types_and_regions() {
 /// `storage.texture-replace-region-ordering`: a copy encoded before a replaceRegion but committed after it reads the
 /// later bytes, as on real Metal.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn replace_region_ordering_matches_metal() {
     let golden = Golden::load("storage.texture-replace-region-ordering");
     let g = Gpu::new(true);
@@ -716,6 +718,7 @@ const WRITE_TEXTURE: &str = "
 
 /// `storage.texture-get-bytes-after-gpu-write`: getBytes of a shared texture after a compute pass wrote it.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn get_bytes_after_gpu_write_matches_metal() {
     use webmetal_host::gpu::idl::{
         AutoLayoutMode, BindGroupDescriptor, BindGroupEntry, BindingResource, ComputePassDescriptor,
@@ -766,6 +769,7 @@ fn get_bytes_after_gpu_write_matches_metal() {
 /// A float texture whose twin went stale because the GPU wrote it is read from the stored texture, which needs the
 /// host's texel copies of the format proven; the specials the reference inputs hold come back unchanged.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn stored_reads_after_gpu_writes() {
     let golden = Golden::load("format.RGBA16Float.upload-read");
     let input = golden.bytes("input").unwrap();
@@ -792,6 +796,7 @@ fn stored_reads_after_gpu_writes() {
 /// Software-decoded compressed textures filled by blits rebuild their stored texels from the blocks; the stored
 /// texels equal the format module's decode of the blocks.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn decoded_textures_refresh_after_blits() {
     use webmetal_host::format::handling::Emulation;
     use webmetal_host::format::storage;

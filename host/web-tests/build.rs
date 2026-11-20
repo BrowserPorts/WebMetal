@@ -9,6 +9,9 @@
 //! - each `mod <name>;` names its file by absolute path, since the included text is not in `host/tests`;
 //! - each `#[test]` attribute is replaced by `#[allow(dead_code)]` (which keeps the file's line numbers), and the
 //!   function it marked is listed in `CASES`, in file order;
+//! - a test's `#[cfg_attr(not(webmetal_reference), ignore = ...)]` (the native build ignores it without the Metal
+//!   reference outputs) becomes an empty line: in a browser the page's server always serves the reference outputs
+//!   (host/tools/web_corpus.py, which refuses to run without them);
 //! - `println!` and `eprintln!` write to the page's log (the test's output, as `cargo test -- --nocapture` shows it),
 //!   through macros defined ahead of the text, which shadow the standard ones for the whole crate.
 //!
@@ -39,6 +42,7 @@ fn main() {
     let out = PathBuf::from(env::var("OUT_DIR").unwrap());
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rerun-if-changed={}", tests.display());
+    println!("cargo:rustc-check-cfg=cfg(webmetal_reference)");
     for name in FILES {
         let path = tests.join(format!("{name}.rs"));
         println!("cargo:rerun-if-changed={}", path.display());
@@ -73,6 +77,10 @@ fn generate(name: &str, text: &str, tests: &std::path::Path) -> String {
             // attached to the function.
             marked = true;
             body.push_str("#[allow(dead_code)]\n");
+            continue;
+        }
+        if marked && line.starts_with("#[cfg_attr(not(webmetal_reference), ignore") {
+            body.push('\n');
             continue;
         }
         if marked {

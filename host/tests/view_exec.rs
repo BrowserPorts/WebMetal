@@ -218,6 +218,7 @@ fn r32_descriptor(kind: u64, (w, hh): (u64, u64), levels: u64, array_length: u64
 
 /// texture.view-levels-slices: level and slice ranges, type-changing views and a view of a view, read by kernels.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn levels_and_slices() {
     let h = Harness::new();
     let g = Golden::load("texture.view-levels-slices");
@@ -441,6 +442,7 @@ struct WriteTarget {
 /// are compared byte for byte. The writes Apple silicon does not ignore although MSL 4.1 section 6.13 puts them out of
 /// bounds (recorded for reference only) leave the contents that section gives.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn write_levels() {
     let h = Harness::new();
     let g = Golden::load("texture.write-levels");
@@ -654,6 +656,7 @@ fn unorm_corner_codes(h: &Harness, codes: &[u8], reads: &[u8]) -> Vec<u8> {
 /// R32Uint view, and an sRGB texture through its linear and RGBA8Uint views, with every `exact` record of the case's
 /// reads and writes compared byte for byte. The uint views keep their texels in the texture's aliases.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn format_views() {
     let h = Harness::new();
     let g = Golden::load("texture.view-format-reinterpret");
@@ -882,6 +885,7 @@ fn default_sampler(h: &Harness) -> Handle {
 /// with every `exact` record of the reads compared byte for byte. The swizzle is the WebGPU view's where the host has
 /// texture-component-swizzle, else the compiled kernel's.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn swizzles() {
     let h = Harness::new();
     let g = Golden::load("texture.view-swizzle");

@@ -255,6 +255,7 @@ fn coherence_interleaving(g: &Gpu, page: Option<u64>) {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn coherence_interleaving_matches_metal() {
     let g = Gpu::new(true);
     coherence_interleaving(&g, None);

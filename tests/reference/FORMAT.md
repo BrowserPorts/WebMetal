@@ -15,8 +15,8 @@ bit patterns in hexadecimal, so every value round-trips exactly.
 | `release/<case>.json` | Case file for the `release` variant |
 | `debug-layer/<case>.json` | Case file for the `debug-layer` variant |
 
-The committed reference outputs live in `goldens/<device key>/` with the same
-layout.
+A reference run kept for the executor's tests (`goldens/<device key>/`, not
+committed; README.md) has the same layout.
 
 ## Variants
 

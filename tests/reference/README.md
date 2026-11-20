@@ -25,7 +25,7 @@ environment built for iOS.
 | `compare.py` | Compares runs under the recorded rules |
 | `FORMAT.md` | Output format and comparison rules |
 | `COVERAGE.md` | API areas and the cases that cover them |
-| `goldens/<device key>/` | Reference outputs recorded on real Metal |
+| `goldens/` | Where you keep the reference outputs you record on real Metal; ignored by Git |
 
 ## Requirements
 
@@ -113,7 +113,7 @@ gates cite the Metal Feature Set Tables dated 2026-10-23.
 ## Compare
 
 ```sh
-python3 compare.py goldens/apple-m4-macos-27.0.1-26a434 RUN   # reference against a run
+python3 compare.py goldens/KEY RUN                            # reference against a run
 python3 compare.py --check RUN                                # one run on its own
 ```
 
@@ -124,8 +124,13 @@ device profile. FORMAT.md describes each step.
 
 ## Reference outputs
 
-`goldens/<device key>/` holds a complete run of both variants on one real
-device. Its `run.json` records the device name, GPU architecture and family
+The reference outputs are not part of the repository: they are what Metal
+did on your own Mac. Record them as below; the executor's tests read them
+from the run `WEBMETAL_REFERENCE` names (`host/build.rs`), and without it the
+tests that compare with Metal are ignored, saying so.
+
+A reference run, kept in `goldens/<device key>/` (ignored by Git), is a
+complete run of both variants on one real device. Its `run.json` records the device name, GPU architecture and family
 answers, the OS version and build, the Metal framework version, the SDK and
 compiler versions, and the digest of the harness sources that produced it.
 
@@ -149,11 +154,12 @@ python3 compare.py --check RUN1
 python3 compare.py RUN1 RUN2
 diff -r RUN1/release RUN2/release && diff -r RUN1/debug-layer RUN2/debug-layer
 mkdir -p goldens/KEY && cp -R RUN1/run.json RUN1/release RUN1/debug-layer goldens/KEY/
+export WEBMETAL_REFERENCE=$PWD/goldens/KEY
 ```
 
 `KEY` is `device.key` in `RUN1/run.json`. A change to the harness sources
 requires recording the reference again, so that `build.source_sha256` in the
-committed manifest matches the sources next to it.
+reference's manifest matches the sources next to it.
 
 ## Writing a case
 

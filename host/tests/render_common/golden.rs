@@ -1,4 +1,4 @@
-//! The Metal reference outputs (`tests/reference/goldens`, release variant) and their comparison with what a replay
+//! The Metal reference outputs (`WEBMETAL_REFERENCE`, release variant) and their comparison with what a replay
 //! measured, under the rules of `tests/reference/FORMAT.md` ("Comparing two runs", step 5): every output record of the
 //! reference must be measured, with the same kind, type and layout, and satisfy its rule; a replay may not measure
 //! records the reference lacks.
@@ -19,7 +19,7 @@ fn hex(s: &str) -> Vec<u8> {
 impl Golden {
     pub fn load(case: &str) -> Golden {
         let path = crate::mem_common::golden_path(case);
-        let text = crate::mem_common::files::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
+        let text = crate::mem_common::files::read_reference(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
         Golden { case: case.to_string(), file: Json::parse(&text) }
     }
 

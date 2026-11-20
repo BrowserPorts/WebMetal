@@ -91,6 +91,7 @@ fn new_host() -> (webmetal_host::gpu::native::NativeGpu, RefHost<webmetal_host::
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn drawable_render_present_matches_metal_through_a_recording_file() {
     let golden = Golden::load("drawable.render-present");
     let pixels = golden.bytes("pixels");

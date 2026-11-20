@@ -129,6 +129,7 @@ fn fill(b: Handle, location: u64, length: u64, value: u8) -> Command {
 
 /// blit.copy-buffer, blit.copy-buffer-unaligned (iOS only), blit.fill-buffer.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn buffer_copies_and_fills() {
     let h = Harness::new();
     let mut t = Tally::new(&h);
@@ -178,6 +179,7 @@ fn buffer_copies_and_fills() {
 /// blit.buffer-to-texture-2d, -3d, blit.slices-and-levels, blit.texture-to-buffer, blit.texture-to-texture-region,
 /// blit.texture-to-texture-whole, blit.optimize-contents.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn texture_blits() {
     let h = Harness::new();
     let mut t = Tally::new(&h);
@@ -371,6 +373,7 @@ fn texture_blits() {
 
 /// blit.texture-to-texture-multisample: a cleared 4-sample texture copied whole and read per sample by a kernel.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn multisample_copy() {
     let h = Harness::new();
     let mut t = Tally::new(&h);
@@ -519,6 +522,7 @@ fn readback(h: &Harness, texture: Handle, bpp: u64, options: u64) -> Vec<u8> {
 
 /// The depth and stencil format cases: per-aspect blits and reads (Formats.m).
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn depth_stencil_blits() {
     let h = Harness::new();
     let mut t = Tally::new(&h);
@@ -625,6 +629,7 @@ fn depth_stencil_blits() {
 /// format.<format>.blocks: blit readback and texture copy of compressed blocks (FormatsCompressed.m), for every
 /// compressed format with a reference case that this host stores (natively or decoded).
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn compressed_block_blits() {
     let h = Harness::new();
     let mut t = Tally::new(&h);

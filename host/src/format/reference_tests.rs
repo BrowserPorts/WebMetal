@@ -1,5 +1,6 @@
-//! The decoders against real Metal: the Metal reference outputs recorded on an Apple M4 (`tests/reference/goldens`)
-//! and the PVRTC measurement of `tables/measure/pvrtc_mac.toml`.
+//! The decoders against real Metal: the Metal reference outputs recorded on an Apple M4 and the PVRTC measurement
+//! (`tables/measure/pvrtc_mac.swift`), which the user supplies (`WEBMETAL_REFERENCE`, `WEBMETAL_MEASUREMENTS`;
+//! testdata.rs). Without them the tests that read them are ignored, naming the variable.
 //!
 //! The reference outputs record the input blocks, `getBytes` and blit readbacks under exact rules, and the decoded
 //! values a compute `read()` returns under rule `none` (Metal does not state the precision of compressed-format
@@ -89,6 +90,7 @@ const ETC: [&str; 6] =
     ["ETC2_RGB8", "ETC2_RGB8_sRGB", "ETC2_RGB8A1", "ETC2_RGB8A1_sRGB", "EAC_RGBA8", "EAC_RGBA8_sRGB"];
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn etc2_matches_real_metal() {
     for name in ETC {
         let (scheme, texels, read) = blocks_case(name);
@@ -100,6 +102,7 @@ fn etc2_matches_real_metal() {
 /// EAC R11 and RG11: the M4 returns the 11-bit value `x` as `x / 2047` (unsigned) and `x / 1023` (signed), correctly
 /// rounded to binary32, not the 16-bit bit-replicated extension. Missing channels read as 0 and alpha as 1.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn eac_11_matches_real_metal_as_eleven_bit_values() {
     for (name, channels) in [("EAC_R11Unorm", 1), ("EAC_R11Snorm", 1), ("EAC_RG11Unorm", 2), ("EAC_RG11Snorm", 2)] {
         let (_, texels, read) = blocks_case(name);
@@ -142,6 +145,7 @@ fn unorm12(k: u16) -> f32 {
 /// ASTC LDR and sRGB. The M4's linear reads are `(C >> 4) / 4095` of the specification's UNORM16 result `C` for every
 /// texel, error blocks included (magenta); its sRGB reads equal the 8-bit sRGB-mode results through the EOTF.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn astc_matches_real_metal() {
     let mut valid_texels = 0;
     for name in astc_names() {
@@ -168,6 +172,7 @@ fn astc_matches_real_metal() {
 }
 
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn pvrtc_matches_real_metal() {
     for name in [
         "PVRTC_RGB_2BPP",
@@ -188,6 +193,7 @@ fn pvrtc_matches_real_metal() {
 /// `tables/measure/pvrtc_mac.toml`: 8×8 images (one 2 bpp word wide) filled with block `i` byte `j` equal to
 /// `(i * 37 + j * 11) & 0xff`.
 #[test]
+#[cfg_attr(not(webmetal_measurements), ignore = "WEBMETAL_MEASUREMENTS is not set: the measurement records are not supplied")]
 fn pvrtc_matches_the_mac_measurement() {
     for (id, bpp, alpha) in [
         ("MTLPixelFormatPVRTC_RGB_2BPP", Bpp::Two, false),
@@ -351,6 +357,7 @@ fn ideal_values(case: &Case, name: &str) -> Vec<f64> {
 /// `c / (2^n - 1)` are equal), the device's reads equal [`super::packed::unorm_to_f32`] of those codes, and quantizing
 /// the exactly representable render inputs reproduces the bytes the device stored.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn packed_layouts_and_conversions_match_real_metal() {
     use super::packed::{layout, pack, unorm_from_f32, unorm_to_f32, unpack};
     for (name, value) in [
@@ -403,6 +410,7 @@ fn packed_layouts_and_conversions_match_real_metal() {
 /// The linear XR formats read as `(c - 384) / 510`; the alpha of `BGRA10_XR` is clamped to [0, 1] in sampling
 /// (Apple's documentation, quoted in `tables/formats.toml` question `6.3-xr-encoding`).
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn xr_reads_match_real_metal() {
     use super::packed::{layout, unpack, xr_to_f32};
     for (name, value) in [("BGR10_XR", 554), ("BGRA10_XR", 552)] {

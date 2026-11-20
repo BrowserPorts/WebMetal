@@ -47,7 +47,7 @@ lists those cases, each with the clause of the specification that blocks it.
 | `host/embed-ref/` | a reference embedder, which runs the executor without a kernel and replays recordings |
 | `host/web-tests/` | the executor's tests built as browser modules |
 | device profile | not in the repository: the answers of the Metal device WebMetal presents, a TOML file you supply. `WEBMETAL_PROFILE` names it when the host builds, and `host/src/format/profile.rs` describes its fields |
-| `tables/` | the specification tables (formats, limits, refusals), each row with its source, and `check.py`, which verifies them |
+| `tables/` | the specification tables (formats, limits, refusals), each row with its source, `check.py`, which verifies them, and in `measure/` the programs that take the measurements some rows cite |
 | `tests/reference/` | `wmref`, small Objective-C programs that record what real Metal does, as the reference the executor is tested against |
 
 ## Building
@@ -65,6 +65,15 @@ your own device:
   `guest/gen/profilegetters.py` writes the profile's getters there.
 
 The build fails, naming what is missing, when any of them is absent.
+
+What real Metal did on your own Mac is not part of the repository either. The
+tests that compare with it read it from where you name it when the host is
+built, and are ignored, saying so, without it:
+
+- `WEBMETAL_REFERENCE`: a run of the reference harness (`tests/reference`,
+  `wmref run --out RUN`; its README shows how to record one).
+- `WEBMETAL_MEASUREMENTS`: the directory of measurement records the programs
+  in `tables/measure/` write; `tables/check.py --measurements` reads it too.
 
 The Rust side is one Cargo workspace:
 

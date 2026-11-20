@@ -5,7 +5,12 @@ Fails (exit status 1) when any table cell is empty, any row lacks a citation (op
 questions instead need a reason), any citation does not verify against its pinned
 source, or a generated table differs from what its generator produces now.
 
-Usage: check.py --cache DIR
+The measurement records that measurement citations name (the TOML files the scripts in
+measure/ write on the user's Mac) are not part of the repository: --measurements DIR (or
+WEBMETAL_MEASUREMENTS) names their directory. Without it every measurement citation is
+reported as skipped (counted, not verified); a directory given but missing is an error.
+
+Usage: check.py --cache DIR [--measurements DIR]
 """
 
 import argparse
@@ -35,13 +40,13 @@ ROW_ARRAYS = {
 }
 
 
-def load_measures():
-    """{measurement id: {case id: text}} from the committed measurement results."""
+def load_measures(mdir):
+    """{measurement id: {case id: text}} from the measurement records in mdir."""
     out = {}
-    mdir = os.path.join(HERE, "measure")
-    for name in sorted(os.listdir(mdir)):
-        if not name.endswith(".toml"):
-            continue
+    names = [n for n in sorted(os.listdir(mdir)) if n.endswith(".toml")]
+    if not names:
+        raise SystemExit("no measurement records (*.toml) in %s" % mdir)
+    for name in names:
         with open(os.path.join(mdir, name), "rb") as f:
             d = tomllib.load(f)
         cases = {"meta": "\n".join("%s: %s" % (k, v) for k, v in d["meta"].items())}
@@ -66,11 +71,16 @@ def regenerate(cache, name, script):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--cache", default=os.environ.get("TABLES_CACHE"))
+    ap.add_argument("--measurements", default=os.environ.get("WEBMETAL_MEASUREMENTS"),
+                    help="the directory of measurement records (default: $WEBMETAL_MEASUREMENTS)")
     a = ap.parse_args()
     if not a.cache:
         raise SystemExit("a cache directory is required (--cache or TABLES_CACHE)")
+    if a.measurements and not os.path.isdir(a.measurements):
+        raise SystemExit("the measurement records %s do not exist" % a.measurements)
     sources = specdoc.load_sources()
-    chk = citecheck.Checker(sources, a.cache, measures=load_measures())
+    measures = load_measures(a.measurements) if a.measurements else None
+    chk = citecheck.Checker(sources, a.cache, measures=measures)
 
     for name, script in GENERATED:
         path = os.path.join(HERE, name)
@@ -106,6 +116,9 @@ def main():
 
     for e in chk.errors:
         print("FAIL " + e)
+    if chk.skipped:
+        print("SKIPPED %d measurement citations: no measurement records supplied (--measurements or "
+              "WEBMETAL_MEASUREMENTS)" % chk.skipped)
     print("%d citations checked, %d failures" % (chk.checked, len(chk.errors)))
     return 1 if chk.errors else 0
 

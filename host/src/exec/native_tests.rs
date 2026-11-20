@@ -1,7 +1,8 @@
 //! The executor on a native WebGPU implementation (Dawn or wgpu-native, whichever the build links): command buffer
 //! status and completion order, events, fences, debug groups, protocol violations, unimplemented records, device loss
-//! and out-of-memory, each checked against the reference outputs real Metal recorded (`tests/reference/goldens`)
-//! where the Metal reference harness has a case for it.
+//! and out-of-memory, each checked against the reference outputs real Metal recorded where the Metal reference harness
+//! has a case for it. Those outputs are the run of the reference harness `WEBMETAL_REFERENCE` names (host/build.rs);
+//! without it the tests that compare with them are ignored, naming the variable, and fail naming it when run anyway.
 //!
 //! The executor runs here with stand-ins for the modules that plug into it: a memory service that makes buffers and
 //! keeps their guest bytes and GPU copies coherent (whole-buffer shadow comparison, exact for programs that do not
@@ -778,7 +779,7 @@ fn assert_completed(c: &CommandBufferCompleted) {
 // The reference outputs -----------------------------------------------------------------------------------------------
 
 mod golden {
-    //! The records of a reference case recorded on real Metal, read from `tests/reference/goldens` (format:
+    //! The records of a reference case recorded on real Metal, read from the run `WEBMETAL_REFERENCE` names (format:
     //! `tests/reference/FORMAT.md`). Only the `release` variant applies: the debug layer runs in the guest, in
     //! Metal.framework, before anything reaches the executor.
 
@@ -951,15 +952,19 @@ mod golden {
         }
     }
 
-    pub const DEVICE: &str = "apple-m4-macos-27.0.1-26a434";
+    #[cfg(webmetal_reference)]
+    fn reference_dir() -> std::path::PathBuf {
+        std::path::PathBuf::from(env!("WEBMETAL_REFERENCE_DIR"))
+    }
+
+    #[cfg(not(webmetal_reference))]
+    fn reference_dir() -> std::path::PathBuf {
+        panic!("WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")
+    }
 
     /// The release-variant case file of `case`.
     pub fn case(case: &str) -> Json {
-        let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../tests/reference/goldens")
-            .join(DEVICE)
-            .join("release")
-            .join(format!("{case}.json"));
+        let path = reference_dir().join("release").join(format!("{case}.json"));
         let text = std::fs::read(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
         Parser { s: &text, at: 0 }.value()
     }
@@ -1008,6 +1013,7 @@ mod golden {
 /// CommandBufferCompleted with status completed and no error; the work is in guest memory when it completes; the times
 /// are positive and ordered.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn status_handlers_and_timing() {
     let x = Harness::new();
     x.open(T1);
@@ -1065,6 +1071,7 @@ fn status_handlers_and_timing() {
 /// Reference case `command-buffer.enqueue-order`: the framework hands command buffers to the driver's commit in enqueue
 /// order (b, then a); they run and complete in that order.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn completion_follows_commit_order() {
     let x = Harness::new();
     x.open(T1);
@@ -1090,6 +1097,7 @@ fn completion_follows_commit_order() {
 /// Reference case `command-buffer.retained-references`: an unretained command buffer whose objects the caller keeps
 /// alive runs normally.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn unretained_references_run_normally() {
     let x = Harness::new();
     x.open(T1);
@@ -1107,6 +1115,7 @@ fn unretained_references_run_normally() {
 /// Reference case `debug.labels-and-groups`, and Metal's acceptance of a pop with no group open and of groups left open
 /// (measured on Apple M4, macOS 27.0.1): every command buffer completes and no WebGPU error is raised.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn labels_and_debug_groups() {
     let x = Harness::new();
     x.open(T1);
@@ -1282,6 +1291,7 @@ fn passed_waits_are_reported() {
 /// Reference case `event.cross-queue-signal-wait`: a command buffer waiting on an MTLEvent does not complete before a
 /// buffer on another queue signals it, then runs after the signalling work.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn cross_queue_signal_and_wait() {
     let x = Harness::new();
     x.open(T1);
@@ -1457,6 +1467,7 @@ fn wait_timeouts_count_from_the_wait() {
 /// Reference case `event.shared-cpu-signal`: a CPU signal releases a GPU wait only at the awaited value; the GPU signal
 /// sets the kernel object's value before the command buffer completes.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn shared_event_cpu_and_gpu_signals() {
     let x = Harness::new();
     x.open(T1);
@@ -1494,6 +1505,7 @@ fn shared_event_cpu_and_gpu_signals() {
 /// signal's value (its listeners fire from it, in IOSurface.framework), handles registered from one kernel object share
 /// its value, and the executor releases the object once no handle or command buffer refers to it.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn shared_event_handles_and_signal_values() {
     let x = Harness::new();
     x.open(T1);
@@ -1535,6 +1547,7 @@ fn shared_event_handles_and_signal_values() {
 /// Reference case `fence.across-encoders`, `fence.wait-before-later-update` and `fence.update-then-wait-same-encoder`
 /// (release variant): command buffers with fences complete, and passes run in encoding order.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn fences() {
     let x = Harness::new();
     x.open(T1);
@@ -1592,6 +1605,7 @@ fn fences() {
 /// `event.signal-with-open-encoder`) never reaches the host from a guest that does what Metal does; if it does, it is
 /// refused as a protocol violation and nothing of it runs.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn misuse_metal_terminates_on_is_refused() {
     let x = Harness::new();
     x.open(T1);

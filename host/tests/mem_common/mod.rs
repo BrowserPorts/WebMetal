@@ -226,11 +226,11 @@ impl Embedder for Guest {
     }
 }
 
-/// The reference device whose outputs the tests compare with.
-pub const GOLDEN_DEVICE: &str = "apple-m4-macos-27.0.1-26a434";
-
-/// The files of the repository the tests read, by their path from the repository's root: from the checkout, or in a
-/// browser from the page's server.
+/// The files the tests read, by their path from the repository's root: from the checkout, or in a browser from the
+/// page's server. The Metal reference outputs are not in the repository: `WEBMETAL_REFERENCE` names the run of the
+/// reference harness the user recorded (host/build.rs), and the tests that compare with it are ignored without it,
+/// naming the variable; run anyway, they fail naming it. In a browser the page's server serves that run under
+/// `__reference/` (host/tools/web_corpus.py).
 pub mod files {
     #[cfg(not(target_arch = "wasm32"))]
     fn path(rel: &str) -> std::path::PathBuf {
@@ -263,18 +263,59 @@ pub mod files {
 
     #[cfg(target_arch = "wasm32")]
     pub use webmetal_web_tests::fs::list;
+
+    /// A file of the Metal reference outputs, by its path in the run.
+    #[cfg(all(not(target_arch = "wasm32"), webmetal_reference))]
+    fn reference_path(rel: &str) -> std::path::PathBuf {
+        std::path::PathBuf::from(env!("WEBMETAL_REFERENCE_DIR")).join(rel)
+    }
+
+    #[cfg(all(not(target_arch = "wasm32"), not(webmetal_reference)))]
+    fn reference_path(_: &str) -> std::path::PathBuf {
+        panic!("WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn read_reference(rel: &str) -> std::io::Result<String> {
+        std::fs::read_to_string(reference_path(rel))
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn read_reference(rel: &str) -> std::io::Result<String> {
+        read_to_string(&format!("__reference/{rel}"))
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn reference_exists(rel: &str) -> bool {
+        reference_path(rel).is_file()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn reference_exists(rel: &str) -> bool {
+        exists(&format!("__reference/{rel}"))
+    }
+
+    /// The names of the files in directory `rel` of the run.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn list_reference(rel: &str) -> std::io::Result<Vec<String>> {
+        Ok(std::fs::read_dir(reference_path(rel))?.filter_map(|e| e.ok()?.file_name().into_string().ok()).collect())
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn list_reference(rel: &str) -> std::io::Result<Vec<String>> {
+        list(&format!("__reference/{rel}"))
+    }
 }
 
-/// The path of a case file of the Metal reference outputs (release variant), from the repository's root.
+/// The path of a case file of the Metal reference outputs (release variant), in the run.
 pub fn golden_path(case: &str) -> String {
-    format!("tests/reference/goldens/{GOLDEN_DEVICE}/release/{case}.json")
+    format!("release/{case}.json")
 }
 
 /// The names of the reference outputs' case files (release variant), without `.json`.
 pub fn golden_cases() -> Vec<String> {
-    let dir = format!("tests/reference/goldens/{GOLDEN_DEVICE}/release");
-    files::list(&dir)
-        .unwrap_or_else(|e| panic!("{dir}: {e}"))
+    files::list_reference("release")
+        .unwrap_or_else(|e| panic!("release: {e}"))
         .into_iter()
         .filter_map(|n| n.strip_suffix(".json").map(str::to_string))
         .collect()
@@ -289,12 +330,12 @@ pub struct Golden {
 impl Golden {
     pub fn load(case: &str) -> Golden {
         let path = golden_path(case);
-        let text = files::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
+        let text = files::read_reference(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
         Golden { case: case.to_string(), text }
     }
 
     pub fn exists(case: &str) -> bool {
-        files::exists(&golden_path(case))
+        files::reference_exists(&golden_path(case))
     }
 
     pub fn status(&self) -> &str {

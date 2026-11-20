@@ -17,14 +17,48 @@
 //!
 //! - `WEBMETAL_PROFILE`: the A10X device profile, described in `src/format/profile.rs`;
 //! - `WEBMETAL_AGX_TEXTURE_FORMATS`: the A10X driver's texture format table, described in `src/mem/agx/mod.rs`.
+//!
+//! What real Metal recorded on the user's Mac is not part of the repository either. The tests that compare with it
+//! are built to run when its variable is set, and are ignored, naming the variable, when it is not; a path given but
+//! missing stops the build:
+//!
+//! - `WEBMETAL_REFERENCE`: one run of the reference harness, the directory `wmref run --out` writes (`run.json`,
+//!   `release/`, `debug-layer/`; `tests/reference/FORMAT.md`), for `cfg(webmetal_reference)`;
+//! - `WEBMETAL_MEASUREMENTS`: the directory of measurement records the scripts in `tables/measure/` write
+//!   (`pvrtc_mac.toml` among them), for `cfg(webmetal_measurements)`.
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     profile::generate();
     agx_texture_formats();
+    supplied_dir("WEBMETAL_REFERENCE", "webmetal_reference", &["run.json", "release"]);
+    supplied_dir("WEBMETAL_MEASUREMENTS", "webmetal_measurements", &["pvrtc_mac.toml"]);
     #[cfg(feature = "native")]
     native::bind();
     println!("cargo:rustc-check-cfg=cfg(webgpu_native, values(\"dawn\", \"wgpu-native\"))");
+}
+
+/// A directory of recorded data the user supplies through `var`: when it is set, the tests that read it are built to
+/// run (`cfg(cfg)`) and find it through `<var>_DIR`. Each name of `holds` must be in it.
+fn supplied_dir(var: &str, cfg: &str, holds: &[&str]) {
+    use std::env;
+    use std::fs;
+
+    println!("cargo:rustc-check-cfg=cfg({cfg})");
+    println!("cargo:rerun-if-env-changed={var}");
+    let path = match env::var(var) {
+        Ok(v) if !v.is_empty() => v,
+        _ => return,
+    };
+    let dir = fs::canonicalize(&path).unwrap_or_else(|e| panic!("{path} ({var}) cannot be opened: {e}"));
+    for name in holds {
+        if !dir.join(name).exists() {
+            panic!("{path} ({var}) has no {name}");
+        }
+    }
+    println!("cargo:rerun-if-changed={}", dir.display());
+    println!("cargo:rustc-cfg={cfg}");
+    println!("cargo:rustc-env={var}_DIR={}", dir.display());
 }
 
 /// The A10X driver's texture format table, as Rust items (`src/mem/agx/mod.rs` lists them), copied to

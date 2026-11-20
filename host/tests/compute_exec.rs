@@ -50,6 +50,7 @@ fn report(h: &Harness, case: &str, count: usize, note: &str) {
 
 /// compute.thread-positions, compute.indirect-dispatch, and `dispatchThreads:` on the A10X.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn dispatch_forms() {
     let h = Harness::new();
     let p = h.pipeline("compute_positions", None, 0);
@@ -133,6 +134,7 @@ fn dispatch_forms() {
 /// compute.threadgroup-memory-length, compute.threadgroup-atomics, compute.set-bytes, compute.dispatch-type-concurrent,
 /// compute.stage-in-region.
 #[test]
+#[cfg_attr(not(webmetal_reference), ignore = "WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")]
 fn encoder_state() {
     let h = Harness::new();
 

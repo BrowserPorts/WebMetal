@@ -1,6 +1,11 @@
-//! Readers for the reference data the format tests compare against: the Metal reference outputs
-//! (`tests/reference/goldens`, format `webmetal-reference/1`, see `tests/reference/FORMAT.md`) and the PVRTC
-//! measurement (`tables/measure/pvrtc_mac.toml`).
+//! Readers for the reference data the format tests compare against: the Metal reference outputs (format
+//! `webmetal-reference/1`, see `tests/reference/FORMAT.md`) and the PVRTC measurement (`pvrtc_mac.toml`, which
+//! `tables/measure/pvrtc_mac.swift` writes).
+//!
+//! Neither is part of the repository: the user records them on real Metal and names them when the crate is built,
+//! `WEBMETAL_REFERENCE` (a run of the reference harness) and `WEBMETAL_MEASUREMENTS` (the directory of measurement
+//! records); build.rs describes both. A test that needs one is ignored without it, with the variable in its reason,
+//! and fails naming the variable when it is run anyway.
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -201,8 +206,27 @@ pub fn repo_path(rel: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join(rel)
 }
 
-/// The reference device key whose outputs the tests compare against.
-pub const GOLDEN_DEVICE: &str = "apple-m4-macos-27.0.1-26a434";
+/// A file of the Metal reference outputs the build was given.
+#[cfg(webmetal_reference)]
+fn reference_path(rel: &str) -> PathBuf {
+    PathBuf::from(env!("WEBMETAL_REFERENCE_DIR")).join(rel)
+}
+
+#[cfg(not(webmetal_reference))]
+fn reference_path(_: &str) -> PathBuf {
+    panic!("WEBMETAL_REFERENCE is not set: the Metal reference outputs are not supplied")
+}
+
+/// A measurement record of the directory the build was given.
+#[cfg(webmetal_measurements)]
+fn measurement_path(name: &str) -> PathBuf {
+    PathBuf::from(env!("WEBMETAL_MEASUREMENTS_DIR")).join(name)
+}
+
+#[cfg(not(webmetal_measurements))]
+fn measurement_path(_: &str) -> PathBuf {
+    panic!("WEBMETAL_MEASUREMENTS is not set: the measurement records are not supplied")
+}
 
 /// A case file of the Metal reference outputs (release variant).
 pub struct Case {
@@ -211,7 +235,7 @@ pub struct Case {
 
 impl Case {
     pub fn load(case: &str) -> Case {
-        let path = repo_path(&format!("tests/reference/goldens/{GOLDEN_DEVICE}/release/{case}.json"));
+        let path = reference_path(&format!("release/{case}.json"));
         let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
         Case { json: parse_json(&text) }
     }
@@ -249,10 +273,10 @@ pub fn hex_bytes(hex: &str) -> Vec<u8> {
     (0..hex.len()).step_by(2).map(|i| u8::from_str_radix(&hex[i..i + 2], 16).unwrap()).collect()
 }
 
-/// The decoded texels of one case of `tables/measure/pvrtc_mac.toml`.
+/// The decoded texels of one case of the PVRTC measurement.
 pub fn pvrtc_measurement(id: &str) -> Vec<f32> {
-    let path = repo_path("tables/measure/pvrtc_mac.toml");
-    let text = std::fs::read_to_string(path).unwrap();
+    let path = measurement_path("pvrtc_mac.toml");
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
     let start = text.find(&format!("id = \"{id}\"")).unwrap_or_else(|| panic!("{id}"));
     let line = text[start..].lines().find(|l| l.starts_with("texels_rgba = [")).unwrap();
     let list = line.trim_start_matches("texels_rgba = [").trim_end_matches(']');
