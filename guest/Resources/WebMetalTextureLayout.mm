@@ -9,6 +9,14 @@
 #include <cstdio>
 #include <initializer_list>
 
+// The A10X driver's format table (kChooseTextureFormatLimit, kUnsupportedFormat, kFormats sorted by pixelFormat,
+// kClassWordMask, kClassWords and kColorSpaceConversions, the items host/src/mem/agx/mod.rs describes) is read from the
+// user's own copy of the driver; the repository holds none of it. The build puts WebMetalTextureFormats.inc on the
+// include path.
+#if !__has_include("WebMetalTextureFormats.inc")
+#error "WebMetalTextureFormats.inc (the A10X driver's texture format table) is not on the include path"
+#endif
+
 namespace webmetal::agx {
 namespace {
 

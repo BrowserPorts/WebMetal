@@ -12,15 +12,54 @@
 //! enumerator and function signature is the one the linked library was built with. The build fails when the feature is
 //! on and either variable is missing.
 //!
-//! Every build reads the A10X device profile the user supplies (`WEBMETAL_PROFILE`, described in
-//! `src/format/profile.rs`); the repository holds no device data, and the build fails when the variable is missing.
+//! Every build reads two files of device data the user supplies; the repository holds none, and the build fails when
+//! either variable is missing:
+//!
+//! - `WEBMETAL_PROFILE`: the A10X device profile, described in `src/format/profile.rs`;
+//! - `WEBMETAL_AGX_TEXTURE_FORMATS`: the A10X driver's texture format table, described in `src/mem/agx/mod.rs`.
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     profile::generate();
+    agx_texture_formats();
     #[cfg(feature = "native")]
     native::bind();
     println!("cargo:rustc-check-cfg=cfg(webgpu_native, values(\"dawn\", \"wgpu-native\"))");
+}
+
+/// The A10X driver's texture format table, as Rust items (`src/mem/agx/mod.rs` lists them), copied to
+/// `$OUT_DIR/agx_texture_formats.rs` for `mem::agx::formats`. Inner doc comments become plain comments there, since the
+/// file is included into a module rather than being one.
+fn agx_texture_formats() {
+    use std::env;
+    use std::fs;
+    use std::path::PathBuf;
+
+    println!("cargo:rerun-if-env-changed=WEBMETAL_AGX_TEXTURE_FORMATS");
+    let path = match env::var("WEBMETAL_AGX_TEXTURE_FORMATS") {
+        Ok(v) if !v.is_empty() => v,
+        _ => panic!(
+            "WEBMETAL_AGX_TEXTURE_FORMATS is not set: the build needs the A10X driver's texture format table, a Rust \
+             file the user supplies (its items are described in host/src/mem/agx/mod.rs). Set \
+             WEBMETAL_AGX_TEXTURE_FORMATS to its path."
+        ),
+    };
+    let file = fs::canonicalize(&path).unwrap_or_else(|e| {
+        panic!("the texture format table {path} (WEBMETAL_AGX_TEXTURE_FORMATS) cannot be opened: {e}")
+    });
+    println!("cargo:rerun-if-changed={}", file.display());
+    let text = fs::read_to_string(&file).unwrap_or_else(|e| {
+        panic!("the texture format table {path} (WEBMETAL_AGX_TEXTURE_FORMATS) cannot be read: {e}")
+    });
+    let mut out = String::new();
+    for line in text.lines() {
+        match line.strip_prefix("//!") {
+            Some(rest) => out.push_str(&format!("//{rest}\n")),
+            None => out.push_str(&format!("{line}\n")),
+        }
+    }
+    let dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    fs::write(dir.join("agx_texture_formats.rs"), out).unwrap();
 }
 
 /// The A10X device profile: the records the format module reads, written to `$OUT_DIR/a10x_profile.rs`.
