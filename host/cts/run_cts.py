@@ -12,7 +12,8 @@ Implementations, each a JavaScript host for the CTS command-line runner around t
 Each query of the list is run in its own runner process; every test case's status (pass, fail, warn, skip) is
 recorded, and a query whose runner exits without reporting a case is recorded as `crash`. With --expect, the run is
 compared with an earlier results file and the differences are printed; the exit status is then 1 if any case
-changed, else 0.
+changed, else 0. Results describe the machine they were run on and are not committed: keep them where --out puts them
+(host/cts/results/, which Git ignores, is the place) and pass one back with --expect.
 
 Usage:
   run_cts.py --impl dawn --cts DIR --dawn-node DIR [--node NODE] [--list FILE] [--out FILE] [--expect FILE]
