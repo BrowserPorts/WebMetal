@@ -1,6 +1,6 @@
 // Driver SPI that the system's clients use (QuartzCore, CoreImage, CoreVideo, Metal Performance Shaders,
-// AppleMetalGLRenderer, WebKit): guest/SPI/clients/<client>.tsv lists each client's driver selectors, and
-// guest/SPI/notes.toml says why each one the plugin does not answer is LOUD.
+// AppleMetalGLRenderer, WebKit; guest/SPI/clients.toml), and guest/SPI/notes.toml says why each one the plugin does not
+// answer is LOUD.
 //
 // The methods are categories on the plugin's classes, which carry the 21H461 driver classes' names
 // (guest/Plugin/roles.toml).

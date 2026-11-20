@@ -1,10 +1,10 @@
 # The system clients of the Metal driver on iPadOS 17.7.11 (21H461) whose driver selectors this package classifies.
 #
-# UniXNU's scripts/audit-target-web-metal-surface.py writes guest/SPI/clients/<name>.tsv for each client: the rows of
-# guest/Generated/surface.tsv whose selector one of the client's images references in its __objc_selrefs (the messages
-# it sends, tests with respondsToSelector: or sends to super), each with the plugin's status and, for a LOUD row or a
-# row of a driver class the plugin does not define, the note that says why (guest/SPI/notes.toml, or the detail a
-# hand-written LOUD method reports). The images are paths in the 21H461 dyld shared cache.
+# A client's driver selectors are those of the target surface whose selector one of the client's images references in
+# its __objc_selrefs (the messages it sends, tests with respondsToSelector: or sends to super), each with the plugin's
+# status and, for a LOUD row or a row of a driver class the plugin does not define, the note that says why
+# (guest/SPI/notes.toml, or the detail a hand-written LOUD method reports). The lists are made from the user's own
+# root and are not part of the repository. The images are paths in the 21H461 dyld shared cache.
 
 [[client]]
 name = "QuartzCore"

@@ -2,6 +2,9 @@
 
 #import "WebMetalSurface.h"
 
+#if !__has_include("../Generated/WebMetalTargetSurface.h")
+#error "guest/Generated/WebMetalTargetSurface.h is missing: it is made from the user's own root (WebMetalSurface.h)"
+#endif
 #include "../Generated/WebMetalTargetSurface.h"
 
 namespace webmetal {

@@ -1,10 +1,9 @@
 # Why a driver selector of iPadOS 17.7.11 (21H461) is a LOUD stub in the plugin, and why the plugin does not define a
 # driver class.
 #
-# UniXNU's scripts/audit-target-web-metal-surface.py puts each [loud.<class>] note into the stub's report
-# (guest/Generated/WebMetalTargetSurface.h) and into the client lists (guest/SPI/clients/<client>.tsv), and fails when a
-# LOUD row or a row of a driver class the plugin does not define on a client list has no note here, or when a note
-# names a selector the plugin implements. A note belongs to the class that carries the stub: the AGXMetalA10 class that
+# Each [loud.<class>] note is the stub's report in guest/Generated/WebMetalTargetSurface.h (made from the user's own
+# root) and the note of its row in the client lists (guest/SPI/clients.toml). A LOUD row, or a row of a driver class the
+# plugin does not define, on a client list has a note here, and no note names a selector the plugin implements. A note belongs to the class that carries the stub: the AGXMetalA10 class that
 # defines the selector on 21H461, or the topmost one of its chain for a selector IOGPU.framework defines. A selector the
 # plugin answers with a hand-written LOUD method reports the method's own detail and has no note here. Addresses are in
 # the 21H461 dyld shared cache, or in its kernelcache where named.

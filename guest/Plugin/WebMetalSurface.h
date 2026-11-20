@@ -1,5 +1,17 @@
 // The shapes of the target-surface tables in guest/Generated/WebMetalTargetSurface.h, and the functions that apply
 // them to the running process.
+//
+// guest/Generated holds what the build needs from the user's own iPadOS 17.7.11 (21H461) root; the repository tracks
+// none of it, and the plugin does not compile without it:
+//
+// - WebMetalTargetSurface.h: in namespace webmetal::target, kCacheUUID (the dyld shared cache's UUID), kRoles (a Role
+//   for each class of guest/Plugin/roles.toml, with the DriverSelector rows its driver class carries) and kBases (the
+//   BaseLayout of each Metal.framework base class the roles reach), in the shapes below;
+// - WebMetalProfileGetters.mm: the capability getters whose answers the device profile records, as categories on the
+//   plugin's device classes that return the recorded values;
+// - WebMetalTextureFormats.inc: the A10X driver's texture format table (host/src/mem/agx/mod.rs);
+// - Info.plist and ResourceRules.plist: the driver bundle's Info.plist and the resource rules of its
+//   _CodeSignature/CodeResources, which the bundle is built with (guest/Plugin/WebMetalDevice.h).
 
 #pragma once
 

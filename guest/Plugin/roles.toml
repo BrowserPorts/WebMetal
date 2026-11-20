@@ -1,9 +1,9 @@
 # The Metal driver classes of the A10X's AGXMetalA10 on iPadOS 17.7.11 (21H461) the plugin defines, under the driver's
 # own names.
 #
-# UniXNU's scripts/audit-target-web-metal-surface.py generates guest/Generated from this list: the driver selectors
-# each class carries (implemented by the plugin or a LOUD stub), the layout of its Metal.framework base, and the audit
-# of the built plugin. Each class keeps the driver's superclass chain inside the bundle, so a class whose 21H461
+# guest/Generated, which the user makes from their own 21H461 root (guest/Plugin/WebMetalSurface.h), follows this
+# list: the driver selectors each class carries (implemented by the plugin or a LOUD stub) and the layout of its
+# Metal.framework base. Each class keeps the driver's superclass chain inside the bundle, so a class whose 21H461
 # superclass is an AGXMetalA10 class (AGXA10XDevice -> AGXA10FamilyDevice) subclasses the plugin's class of that name,
 # which this list names too. Where the driver's chain leaves the bundle through IOGPU.framework (AGXA10FamilyDevice ->
 # IOGPUMetalDevice -> _MTLDevice), the plugin's class subclasses the Metal.framework base directly and carries the
